@@ -15,11 +15,11 @@ begin
             end
         else if(i_jump)
             begin 
-                //To be added 
+                //This is usually not inisde the PC which should already recieve the jumed address 
             end 
         else 
             begin 
-                temp <= temp + 1;
+                temp <= temp + 1; // A PC usually does not do this on its own it is often connected to an adder that does this
             end
 end
 assign o_address = temp; 
