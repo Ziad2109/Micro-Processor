@@ -15,7 +15,7 @@ begin
             end
         else if(i_jump)
             begin 
-                //This is usually not inisde the PC which should already recieve the jumed address 
+                //This is usually not inisde the PC which should already recieve the jumped address 
             end 
         else 
             begin 
