@@ -1,0 +1,389 @@
+`timescale 1ns/1ps
+
+module tb_microprocessor;
+
+    // =========================================================================
+    // Global Clock & Reset Signals
+    // =========================================================================
+    reg clk;
+    reg rst_n; 
+
+    always #10 clk = ~clk;
+
+    // =========================================================================
+    // 1. Single Port RAM & ROM Shared Memory Signals
+    // =========================================================================
+    localparam tb_width = 3;
+    localparam tb_depth = 8;
+    localparam tb_AW    = $clog2(tb_depth);
+    
+    reg                  Read_Or_Write;
+    reg  [tb_AW - 1:0]   ram_addr;       
+    wire [tb_width - 1:0] ram_data_out;   
+    reg  [tb_width - 1:0] ram_data_in;
+
+    reg  [7:0]           rom_addr;       
+    wire [7:0]           rom_data_out;
+
+    // =========================================================================
+    // 2. IR (Instruction Register) Signals
+    // =========================================================================
+    reg        ir_load;
+    reg  [7:0] ir_inst; 
+    
+    wire [2:0] cu_opcode;
+    wire [2:0] alu_opcode;
+    wire [3:0] mux_sel_bus;
+
+    // =========================================================================
+    // 3. ALU Signals 
+    // =========================================================================
+    reg  [tb_depth - 1:0] alu_data_in;
+    reg  [tb_depth - 1:0] alu_data_acc;
+    
+    wire [tb_depth - 1:0] alu_data_out;
+    wire                  alu_z_flag;
+    wire                  alu_c_flag;
+
+    // =========================================================================
+    // 4. Control Unit Signals
+    // =========================================================================
+    wire [2:0] cu_alu_set;
+    reg      cu_mux;
+    wire       cu_memR;
+    wire       cu_memW; 
+    wire       cu_accW;
+    wire       cu_ir_load;
+    wire       cu_pc_branch;
+
+    // =========================================================================
+    // 5. ACC (Accumulator) Signals
+    // =========================================================================
+    reg  [3:0] acc_data_in;   
+    wire [3:0] acc_data_out;   
+
+    // =========================================================================
+    // 6. MUX2to1 Signals
+    // =========================================================================
+    reg  [3:0] mux_data_a;           
+    reg  [3:0] mux_data_b;           
+    wire [3:0] mux_data_out;
+
+    // =========================================================================
+    // 7. Program Counter Signals
+    // =========================================================================
+    reg  [3:0] i_address;
+    reg        i_jump;
+    wire [7:0] o_address;
+
+
+    // =========================================================================
+    // Device Under Test (DUT) Instantiations
+    // =========================================================================
+
+    // 1. Program Counter (PC)
+    PC uut_PC (
+        .i_address(pc_i_address),
+        .clk(clk),
+        .rst_n(rst_n),
+        .i_jump(i_jump),
+        .o_address(o_address)
+    );
+
+    // 2. Read-Only Memory (ROM)
+    ROM uut_ROM (
+        .addr(rom_addr),
+        .data_out(rom_data_out)
+    );
+
+    // 3. Instruction Register (IR)
+    IR dut_IR (
+        .clk(clk),
+        .rst_n(rst_n),
+        .load(ir_load),
+        .inst(ir_inst),
+        .CU(cu_opcode),
+        .ALU(alu_opcode),
+        .MUX(mux_sel_bus)  
+    );
+
+    // 4. Control Unit
+    Control_Unit uut_Control_Unit (
+        .opcode(cu_opcode),
+        .ALU_set(cu_alu_set),
+        .mux(cu_mux),
+        .memR(cu_memR),
+        .memW(cu_memW),
+        .accW(cu_accW),
+        .IR_load(cu_ir_load),
+        .PC_branch(cu_pc_branch)
+    );
+
+    // 5. Arithmetic Logic Unit (ALU)
+    ALU #(
+        .width(tb_width),
+        .depth(tb_depth)
+    ) dut_alu (
+        .data_in(alu_data_in),
+        .data_acc(alu_data_acc),
+        .opcode(alu_opcode),
+        .data_out(alu_data_out),
+        .z_flag(alu_z_flag),
+        .c_flag(alu_c_flag)
+    );
+
+    // 6. Accumulator Register (ACC)
+    ACC uut_ACC (
+        .clk(clk),
+        .rst_n(rst_n),
+        .D(acc_data_in),
+        .Q(acc_data_out)
+    );
+
+    // 7. 2-to-1 Multiplexer
+    MUX2to1 uut_MUX2to1 (
+        .data_a(mux_data_a),
+        .data_b(mux_data_b),
+        .sel(cu_mux),
+        .data_out(mux_data_out)
+    );
+
+    // 8. Single Port RAM
+    Single_Port_RAM #(
+        .width(tb_width),
+        .depth(tb_depth)
+    ) dut_Single_Port_RAM (
+        .clk(clk),
+        .Read_Or_Write(Read_Or_Write),
+        .addr(ram_addr),
+        .data_in(ram_data_in),
+        .data_out(ram_data_out)
+    );
+
+// 1) Test Cases for PC
+initial begin
+    // Initialize
+    clk = 0; 
+    rst_n = 1; 
+    i_jump = 0; 
+    i_address = 4'h0;
+    
+    // 1. Test Reset (Active-Low)
+    rst_n = 0; 
+    #10;
+    if (o_address !== 8'h00) begin
+        $display("Reset Failed.");
+    end
+
+    // 2. Test Increment
+    rst_n = 1; 
+    #10;
+    if (o_address !== 8'h01) begin
+        $display("Increment Failed.");
+    end
+
+    // 3. Test Jump/Load (Corrected to use i_jump and 4-bit address)
+    i_address = 4'hA;     
+    i_jump = 1;          
+    #10;
+    i_jump = 0;          
+
+    if (o_address !== 8'h0A) begin
+        $display("Load Failed.");
+    end
+
+    $display("Test complete.");
+    $finish;
+end
+
+// 2) Test Cases for ROM
+initial begin
+    // Initialize testbench ROM address register
+    rom_addr = 8'h00; 
+    #10;
+
+    //0x00
+    if (rom_data_out !== 8'hA5) begin
+        $display("ROM Read Failed at Address 00. Expected A5, Got %h", rom_data_out);
+    end
+
+    //0x01
+    rom_addr = 8'h01;
+    #10;
+    if (rom_data_out !== 8'h5A) begin
+        $display("ROM Read Failed at Address 01. Expected 5A, Got %h", rom_data_out);
+    end
+
+    //0xFF
+    rom_addr = 8'hFF;
+    #10;
+    if (rom_data_out !== 8'h12) begin
+        $display("ROM Boundary Read Failed at Address FF. Expected 12, Got %h", rom_data_out);
+    end
+
+    $display("ROM Testing Complete.");
+end 
+
+
+// 3) Test Cases for IR
+
+initial begin
+    
+    clk = 0; 
+    rst_n = 1; 
+    ir_load = 0; 
+    ir_inst = 8'h00;
+    
+
+    rst_n = 0; 
+    #10;
+    rst_n = 1; 
+    #10;
+
+
+    if ({cu_opcode, alu_opcode, mux_sel_bus} !== 10'h000) begin
+        $display("IR Reset Initialization Failed.");
+    end else begin
+        $display("IR Reset Successful.");
+    end
+end
+
+
+// 4) Test cases for Control Unit
+
+initial begin
+
+    //cu_opcode = 3'b000;
+    
+    // 2. Wait 10 time units for the combinational logic to settle
+    #10;
+
+    // 3. Verify the 6-bit output bus
+    // For ADD: mux=0, memR=1, memW=0, accW=1, ir_load=0, pc_branch=0
+    // Binary: 010100 -> Hex: 6'h14
+    if ({cu_mux, cu_memR, cu_memW, cu_accW, cu_ir_load, cu_pc_branch} !== 6'b010100) begin
+        $display("Control Unit failed to implement its operations for ADD (000).");
+    end else begin
+        $display("Control Unit ADD (000) operation successful.");
+    end
+end
+
+// 5) Test Cases for ALU
+initial begin
+    // 1. Initialize data inputs
+    alu_data_in  = 8'h05; 
+    alu_data_acc = 8'h02; 
+    //alu_opcode   = 3'b000; 
+    #10; 
+
+    // Test Case 1: Check if 5 + 2 = 7
+    if (alu_data_out !== 8'h07) begin
+        $display("ALU Addition Failed. Expected 07, Got %h", alu_data_out);
+    end else begin
+        $display("ALU Addition Successful.");
+    end
+
+    // 2. Test Case 2: Change opcode to pass-through or clear
+    alu_data_in  = 8'h00;
+    alu_data_acc = 8'h00;
+    #10;
+
+    // Check if output cleared out to 00
+    if (alu_data_out !== 8'h00) begin // (or alu_data_out depending on your exact wire name)
+        $display("ALU Clear Failed.");
+    end
+end
+
+// 6) Test Cases for ACC
+initial begin 
+
+clk = 0; rst_n = 1; acc_data_in = 3'h0;
+
+rst_n = 1;
+#10;
+rst_n = 0;
+#10;
+
+if(acc_data_out !== 3'h0) begin
+    $display("Accumalator failed at 0x00.");
+end else begin
+    $display("Accumalator initialized successfully.");
+end
+end
+
+// 7) Test Cases for MUX
+
+initial begin 
+    // 1. Initialize data inputs
+    mux_data_a = 3'b000; 
+    mux_data_b = 3'b000; 
+    cu_mux = 0;
+    #10;
+
+    // ==========================================
+    // TEST CASE 1: Select Channel B (cu_mux = 1)
+    // ==========================================
+    cu_mux = 1; 
+    mux_data_a = 3'b010; // Input A gets 2
+    mux_data_b = 3'b001; // Input B gets 1
+    #10; 
+
+    // When cu_mux = 1, output should equal Channel B (3'b001)
+    if (mux_data_out !== 3'b001) begin
+        $display("Test Case 1 Failed: Expected Channel B (3'b001), Got %b", mux_data_out);
+    end else begin
+        $display("Test Case 1 Successful (Channel B routed).");
+    end
+
+    // ==========================================
+    // TEST CASE 2: Select Channel A (cu_mux = 0)
+    // ==========================================
+    cu_mux = 0; 
+    mux_data_a = 3'b111; // Input A gets 7
+    mux_data_b = 3'b000; // Input B gets 0
+    #10; 
+
+    // When cu_mux = 0, output should equal Channel A (3'b111)
+    if (mux_data_out !== 3'b111) begin
+        $display("Test Case 2 Failed: Expected Channel A (3'b111), Got %b", mux_data_out);
+    end else begin
+        $display("Test Case 2 Successful (Channel A routed).");
+    end
+end
+
+// 8) Test Cases for Single Port RAM
+
+initial begin 
+    clk = 0; 
+    rst_n = 0; 
+    ram_addr = 3'b000; 
+    ram_data_in = 3'b000; 
+    Read_Or_Write = 0; // 0 = Read mode
+    #10;
+    
+    rst_n = 1; // Release reset
+    #10;
+
+    ram_addr = 3'b000;
+    ram_data_in = 3'b100;   // The data we want to save (Decimal 4)
+    Read_Or_Write = 1;      // Enable WRITING
+    #10;
+    
+    clk = 1; #10;           // Toggle clock high to latch data into RAM
+    clk = 0; #10;           // Return clock low
+    
+    // ==========================================
+    // STEP 2: READ CYCLE (Verify Address 0 holds 3'b100)
+    // ==========================================
+    Read_Or_Write = 0;      // Switch back to READING
+    #10;                    // Wait for combinational output to settle
+
+    if (ram_data_out !== 3'b100) begin
+        $display("RAM failed to display data at address 0x00. Expected 3'b100, Got %b", ram_data_out);
+    end else begin
+        $display("RAM verified successfully. Data matched!");
+    end
+end
+
+
+endmodule
