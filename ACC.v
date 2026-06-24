@@ -1,6 +1,6 @@
 module ACC(
   input clk,
-  input rst,
+  input reset,
   input [3:0] D,
   output reg [3:0] Q
 );
