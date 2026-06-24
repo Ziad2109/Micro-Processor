@@ -1,4 +1,4 @@
-module Top_module (
+module Top_Module (
     input  wire       clk,
     input  wire       reset,
 
@@ -22,6 +22,8 @@ module Top_module (
     wire       memory_read;
     wire       memory_write;
     wire       accumulator_write;
+    wire       IR_load;
+    wire       PC_branch;
 
     wire [3:0] ram_data;
     wire [3:0] alu_result;
@@ -37,22 +39,31 @@ module Top_module (
             instruction_valid <= 1'b1;
     end
 
+    //=========================================================
+    // Program Counter
+    //=========================================================
     PC pc_inst (
         .i_address (4'b0000),
-        .i_clk     (clk),
-        .i_rst_n   (~reset),
+        .clk       (clk),
+        .rst_n     (~reset),
         .i_jump    (1'b0),
         .o_address (pc_address)
     );
 
+    //=========================================================
+    // ROM
+    //=========================================================
     ROM rom_inst (
-        .i_addr     (pc_address),
-        .o_data_out (instruction)
+        .addr     (pc_address),
+        .data_out (instruction)
     );
 
+    //=========================================================
+    // Instruction Register
+    //=========================================================
     IR instruction_register_inst (
         .clk   (clk),
-        .reset (reset),
+        .rst_n (~reset),
         .load  (1'b1),
         .inst  (instruction),
         .CU    (opcode),
@@ -60,56 +71,66 @@ module Top_module (
         .MUX   (memory_address)
     );
 
+    //=========================================================
+    // Control Unit
+    //=========================================================
     Control_Unit control_unit_inst (
-        .opcode  (opcode),
-        .z_flag  (zero_flag),
-        .c_flag  (carry_flag),
-        .ALU_sel (alu_select),
-        .mux     (mux_select),
-        .memR    (memory_read),
-        .memW    (memory_write),
-        .accW    (accumulator_write)
+        .opcode    (opcode),
+        .ALU_set   (alu_select),
+        .mux       (mux_select),
+        .memR      (memory_read),
+        .memW      (memory_write),
+        .accW      (accumulator_write),
+        .IR_load   (IR_load),
+        .PC_branch (PC_branch)
     );
 
-    Single_Port_Ram #(
-        .WIDTH (4),
-        .DEPTH (16),
-        .AW    (4)
-    ) data_memory_inst (
-        .clk_in        (clk),
-        .Read_Or_write (~(memory_write & instruction_valid)),
+    //=========================================================
+    // RAM
+    //=========================================================
+    Single_Port_RAM data_memory_inst (
+        .clk           (clk),
+        .Read_Or_Write (~(memory_write & instruction_valid)),
         .addr          (memory_address),
-        .Data_In       (accumulator_data),
-        .Data_Out      (ram_data)
+        .data_in       (accumulator_data),
+        .data_out      (ram_data)
     );
 
+    //=========================================================
+    // ALU
+    //=========================================================
     ALU alu_inst (
-        .data_mem (ram_data),
-        .acc      (accumulator_data),
+        .data_in  (ram_data),
+        .data_acc (accumulator_data),
         .opcode   (alu_select),
-        .results  (alu_result),
-        .Z        (zero_flag),
-        .C        (carry_flag)
+        .data_out (alu_result),
+        .z_flag   (zero_flag),
+        .c_flag   (carry_flag)
     );
 
+    //=========================================================
+    // MUX
+    //=========================================================
     MUX2to1 accumulator_mux_inst (
-        .A   (alu_result),
-        .B   (ram_data),
-        .sel (mux_select),
-        .Y   (accumulator_input)
+        .data_a   (alu_result),
+        .data_b   (ram_data),
+        .sel      (mux_select),
+        .data_out (accumulator_input)
     );
-ACC accumulator_inst (
-    .clk (clk),
-    .rst (~reset),
-    .D   (
-        (accumulator_write & instruction_valid)
-            ? accumulator_input
-            : accumulator_data
-    ),
-    .Q   (accumulator_data)
-);
 
-    // External/debug outputs
+    //=========================================================
+    // Accumulator
+    //=========================================================
+    ACC accumulator_inst (
+        .clk      (clk),
+        .rst_n    (~reset),
+        .D  (accumulator_input),
+        .Q (accumulator_data)
+    );
+
+    //=========================================================
+    // Debug Outputs
+    //=========================================================
     assign pc_out          = pc_address;
     assign instruction_out = instruction;
     assign accumulator_out = accumulator_data;
