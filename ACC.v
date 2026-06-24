@@ -1,12 +1,12 @@
 module ACC(
   input clk,
-  input rst,
+  input rst_n,
   input [3:0] D,
   output reg [3:0] Q
 );
-  always @(posedge clk or negedge rst)
+  always @(posedge clk or negedge rst_n)
     begin
-      if (!rst) Q<= 4'b0000;
+      if (!rst_n) Q<= 4'b0000;
       else Q <= D;
     end
 endmodule
