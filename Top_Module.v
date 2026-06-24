@@ -2,7 +2,6 @@ module Top_module (
     input  wire       clk,
     input  wire       reset,
 
-    // Debug/FPGA outputs
     output wire [7:0] pc_out,
     output wire [7:0] instruction_out,
     output wire [3:0] accumulator_out,
@@ -11,29 +10,24 @@ module Top_module (
     output wire       carry_flag
 );
 
-    // PC and instruction signals
     wire [7:0] pc_address;
     wire [7:0] instruction;
 
-    // Instruction register outputs
     wire [2:0] opcode;
     wire [2:0] ir_alu_bits;
     wire [3:0] memory_address;
 
-    // Control signals
     wire [2:0] alu_select;
     wire       mux_select;
     wire       memory_read;
     wire       memory_write;
     wire       accumulator_write;
 
-    // Datapath signals
     wire [3:0] ram_data;
     wire [3:0] alu_result;
     wire [3:0] accumulator_input;
     wire [3:0] accumulator_data;
 
-    // Prevent execution of the reset value stored in the IR
     reg instruction_valid;
 
     always @(posedge clk or posedge reset) begin
