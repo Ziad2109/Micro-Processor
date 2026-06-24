@@ -6,7 +6,7 @@ module ACC(
 );
   always @(posedge clk or negedge rst)
     begin
-      if (rst) Q<= 4'b0000;
+      if (!rst) Q<= 4'b0000;
       else Q <= D;
     end
 endmodule
