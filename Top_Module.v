@@ -124,6 +124,7 @@ module Top_Module (
     ACC accumulator_inst (
         .clk      (clk),
         .rst_n    (~reset),
+        .we (accumulator_write),
         .D  (accumulator_input),
         .Q (accumulator_data)
     );
