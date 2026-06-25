@@ -7,7 +7,7 @@ module Single_Port_RAM #(
     input wire Read_Or_Write,
     input wire [AW - 1: 0] addr,
     input wire [width - 1: 0] data_in,     
-    output wire [width - 1:0] data_out 
+    output wire [depth - 1:0] data_out 
 );
 
     reg [width-1:0] mem [0:depth-1];
