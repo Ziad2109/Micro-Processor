@@ -89,7 +89,8 @@ module Top_Module (
     //=========================================================
     Single_Port_RAM data_memory_inst (
         .clk           (clk),
-        .Read_Or_Write (~(memory_write & instruction_valid)),
+        .Read (memory_write),
+        .Write (memory_read),
         .addr          (memory_address),
         .data_in       (accumulator_data),
         .data_out      (ram_data)
