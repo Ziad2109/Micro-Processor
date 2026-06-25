@@ -1,22 +1,23 @@
-module PC (
-    input wire [7:0] i_address,      
+module PC(
     input wire clk,
-    input wire rst_n,
-    input wire i_jump,                
-    output wire [7:0] o_address
+    input wire rst,
+    input wire [7:0] PC_next,
+    output wire [7:0] PC
 );
 
-    reg [7:0] temp;
+reg [7:0] PCreg ;
 
-    always @(posedge clk or negedge rst_n) begin 
-        if (!rst_n) begin 
-            temp <= 8'd0;
-              
-        end else begin 
-            temp <= temp + 1'b1;      
-        end
+always @(posedge clk or posedge rst)
+begin
+
+    if (rst) begin
+        PCreg <= 0;
     end
+    else begin
+        PCreg <= PC_next;
+    end
+end
 
-    assign o_address = temp; 
+assign PC = PCreg;
 
-endmodule
+endmodule 

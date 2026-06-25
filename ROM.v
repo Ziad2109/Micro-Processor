@@ -1,13 +1,22 @@
-module ROM ( 
-    input wire [3:0] addr,
-    output wire [7:0] data_out
+module ROM #(
+    parameter        WIDTH     = 8,
+    parameter        DEPTH     = 256,
+    parameter        AW        = $clog2(DEPTH),
+    parameter        INIT_FILE = "rom_init.txt"
+)(
+    input                  clk,
+    input      [AW-1:0]    addr,
+    output reg [WIDTH-1:0] dout
 );
 
-    reg [3:0] mem [0:255];
-    /*initial begin
-        $readmemb("rom_data.txt", mem); 
-    end*/
-    
-    assign data_out = mem[addr];
+    reg [WIDTH-1:0] mem [0:DEPTH-1];
+
+    initial begin
+        $readmemh(INIT_FILE, mem);
+    end
+
+    always @(posedge clk) begin
+        dout <= mem[addr];
+    end
 
 endmodule
