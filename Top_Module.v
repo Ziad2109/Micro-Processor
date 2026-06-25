@@ -67,7 +67,6 @@ module Top_Module (
         .load  (1'b1),
         .inst  (instruction),
         .CU    (opcode),
-        .ALU   (ir_alu_bits),
         .MUX   (memory_address)
     );
 
