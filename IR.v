@@ -20,4 +20,4 @@ module IR (
             MUX <= inst[3:0];
         end  
     end 
-
+endmodule
