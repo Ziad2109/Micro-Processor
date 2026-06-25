@@ -1,31 +1,26 @@
-module Single_Port_Ram #
-(
-    parameter WIDTH = 4,
-    parameter DEPTH = 16,
-    parameter AW    = $clog2(DEPTH)
-    
-)
-
-(
-   input wire clk_in,
-   input wire Read_Or_write,
-   input wire [AW - 1: 0] addr,
-   input [WIDTH - 1: 0] Data_In,
-   output wire [WIDTH - 1:0] Data_Out   
+module Single_Port_RAM #(
+    parameter width = 8,
+    parameter depth = 256,
+    parameter AW    = $clog2(depth)
+)(
+    input wire clk,
+    input wire Read,
+    input wire Write,
+    input wire [AW - 1: 0] addr,
+    input wire [width - 1: 0] data_in,     
+    output wire [depth - 1:0] data_out 
 );
 
-reg [WIDTH-1:0] mem [0:DEPTH-1];
+    reg [width-1:0] mem [0:depth-1];
 
+    always @(posedge clk) begin             
+        if (Write) begin
+            mem[addr] <= data_in;           
+        end
+        if (Read) begin
+            data_out <= mem[addr];
+        end
+    end 
 
-always @(posedge clk_in) 
-begin
-    if (!Read_Or_write) begin
-
-        mem[addr] <= Data_In;
-
-    end
-end 
-
-assign Data_Out = mem[addr];
 
 endmodule
