@@ -19,8 +19,6 @@ module ALU #(
             3'b011 : data_out = data_in & data_acc;
             3'b100 : data_out = data_in ^ data_acc;
             3'b101 : data_out = ~data_in;
-            3'b110 : data_out = data_in << 1;
-            3'b111 : data_out = data_in >> 1;
             default: data_out = data_in;
         endcase
     end
