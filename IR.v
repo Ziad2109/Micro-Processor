@@ -14,7 +14,7 @@ module IR (
             MUX <= 4'b0000;
         end else if (load) begin    // Changed to 'else if' to prevent race conditions
             CU  <= inst[7:5];
-            MUX <= inst[4:0];
+            MUX <= inst[3:0];
         end  
     end 
 endmodule
