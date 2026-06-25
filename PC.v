@@ -11,8 +11,7 @@ module PC (
     always @(posedge clk or negedge rst_n) begin 
         if (!rst_n) begin 
             temp <= 8'd0;
-        end else if (i_jump) begin 
-            temp <= i_address;        
+              
         end else begin 
             temp <= temp + 1'b1;      
         end
