@@ -1,6 +1,6 @@
 module Single_Port_RAM #(
-    parameter width = 3,
-    parameter depth = 8,
+    parameter width = 4,
+    parameter depth = 16,
     parameter AW    = $clog2(depth)
 )(
     input wire clk,
