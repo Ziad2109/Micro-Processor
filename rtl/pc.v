@@ -11,9 +11,5 @@ module pc (
     output reg  [7:0]  pc_q
 );
 
-    // TODO (owner): up-counter, synchronous active-high reset
-    //   rst:          pc_q <= 8'b0;
-    //   else pc_load: pc_q <= pc_jump_addr;   // unused this ISA
-    //   else:         pc_q <= pc_q + 1'b1;
 
 endmodule

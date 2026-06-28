@@ -13,15 +13,6 @@ module control_unit (
     output reg         pc_load
 );
 
-    // TODO (owner): decode opcode -> control strobes.
-    //   Default everything to 0 first to PREVENT inferred latches.
-    // always @(*) begin
-    //   {acc_load, mem_write, mux_sel, pc_load} = 4'b0000;
-    //   case (opcode)
-    //     4'b0000, 4'b0001, 4'b0010, 4'b0011, 4'b0100: acc_load  = 1'b1; // ADD/SUB/AND/OR/LOAD
-    //     4'b1000:                                     mem_write = 1'b1; // STORE
-    //     default: ;                                                     // NOP / unused
-    //   endcase
-    // end
+  
 
 endmodule

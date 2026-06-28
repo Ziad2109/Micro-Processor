@@ -10,8 +10,6 @@ module ir (
     output reg  [7:0]  ir_q
 );
 
-    // TODO (owner): latch the instruction each clock
-    //   rst:  ir_q <= 8'b0;
-    //   else: ir_q <= instr;
+
 
 endmodule

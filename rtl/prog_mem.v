@@ -8,9 +8,6 @@ module prog_mem (
     output wire [7:0]  instr
 );
 
-    // TODO (owner):
-    //   reg [7:0] mem [0:255];
-    //   initial $readmemh("program.txt", mem);
-    //   assign  instr = mem[addr];
+
 
 endmodule

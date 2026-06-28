@@ -12,12 +12,5 @@ module alu (
     output reg         c_flag          // carry / borrow
 );
 
-    // TODO (owner): combinational ALU
-    //   3'b000 ADD     y = a + b      (c_flag = carry out)
-    //   3'b001 SUB     y = a - b      (c_flag = borrow)
-    //   3'b010 AND     y = a & b
-    //   3'b011 OR      y = a | b
-    //   3'b100 PASS_A  y = a
-    //   z_flag = (y == 4'b0);
 
 endmodule

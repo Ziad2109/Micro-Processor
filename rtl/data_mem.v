@@ -17,13 +17,6 @@ module data_mem #(
     output reg  [3:0]  out_port
 );
 
-    // TODO (owner):
-    //   reg [3:0] mem [0:15];
-    //   assign rdata = (addr == INPUT_ADDR) ? in_port : mem[addr];
-    //   always @(posedge clk) begin
-    //     if (mem_write) mem[addr] <= wdata;
-    //     if (rst) out_port <= 4'b0;
-    //     else if (mem_write && addr == OUTPUT_ADDR) out_port <= wdata;
-    //   end
+
 
 endmodule
