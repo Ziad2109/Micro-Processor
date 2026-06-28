@@ -1,0 +1,11 @@
+// program.txt  -  demo program for the 8-Bit Accumulator Processor
+// loaded by prog_mem.v via $readmemh. one byte per line = { opcode[3:0], addr[3:0] }
+// $readmemh ignores these // comments.
+40   // 0: LOAD 0    ACC <- mem[0]
+01   // 1: ADD 1     ACC <- mem[1] + ACC
+85   // 2: STORE 5   mem[5] <- ACC
+12   // 3: SUB 2     ACC <- mem[2] - ACC
+23   // 4: AND 3     ACC <- mem[3] & ACC
+34   // 5: OR 4      ACC <- mem[4] | ACC
+8F   // 6: STORE F   out_port <- ACC  (mem-mapped 0xF)
+F0   // 7: NOP       hold

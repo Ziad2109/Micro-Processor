@@ -1,0 +1,29 @@
+# Simulation artifacts
+*.vcd
+*.vvp
+*.out
+a.out
+
+# Icarus Verilog
+*.lxt
+*.fst
+
+# Quartus generated
+db/
+incremental_db/
+output_files/
+*.qws
+*.rpt
+*.summary
+*.smsg
+*.pin
+*.pof
+*.sof
+*.jdi
+*.done
+*.qpf.bak
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
