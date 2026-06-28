@@ -1,22 +1,20 @@
-module PC (
-    input wire [7:0] i_address,      
+module PC (    
     input wire clk,
-    input wire rst_n,
-    input wire i_jump,                
-    output wire [7:0] o_address
+    input wire rst_n,                
+    output wire [7:0] o_address //ouput address 
 );
 
     reg [7:0] temp;
 
     always @(posedge clk or negedge rst_n) begin 
-        if (!rst_n) begin 
+        if (!rst_n) begin //Reset condition 
             temp <= 8'd0;
-              
-        end else begin 
-            temp <= temp + 1'b1;      
+        end 
+              else begin //Default beahviour incriment address by 1
+            temp <= temp + 1'b1; 
         end
     end
 
-    assign o_address = temp; 
+    assign o_address = temp; //New address is recieved by ouput port 
 
 endmodule
