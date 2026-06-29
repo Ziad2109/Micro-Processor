@@ -4,12 +4,12 @@
 //  Owner: __________   
 // ============================================================
 module mux2 (
-    input  wire [3:0]  in0,            // ALU result (sel=0)
-    input  wire [3:0]  in1,            // immediate  (sel=1, unused)
-    input  wire        sel,
-    output wire [3:0]  y
+    input  wire [3:0] in0,
+    input  wire [3:0] in1,
+    input  wire       sel,
+    output wire [3:0] y
 );
 
-   
+    assign y = sel ? in1 : in0;
 
 endmodule
