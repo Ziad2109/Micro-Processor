@@ -10,10 +10,78 @@ module tb_pc;
 
     always #5 clk = ~clk;          // 100 MHz
 
-    initial begin
+	 task automatic  check;
+	   input [7:0] expected;
+		 input [63:0] test_num;
+		 begin 
+		 @(posedge clk) #1 ;
+		 if (pc_q!==expected) begin 
+		 $display("Failtime=%0d  test=%0d incoming=%0h exp=%0h", $time, test_num, pc_q, expected);
+		 $finish;
+		 end 
+		 else 
+		 $display (" Pass time=%0d  test=%0d incoming=%0h exp=%0h", $time, test_num, pc_q, expected);
+		 end
+		 endtask
+		  
+	  
+	 
+			initial begin
         $dumpfile("tb_pc.vcd"); $dumpvars(0, tb_pc);
-        #12 rst = 0;
         // TODO: check pc_q counts 0,1,2,... each clock; check reset.
+		 
+		   check(8'h00,0);
+			$display("Pass reset hold");
+			@(negedge clk); rst = 0;
+
+		/* normal count */
+        check(8'h01, 1);   
+        check(8'h02, 2);
+        check(8'h03, 3);
+        check(8'h04, 4);
+        check(8'h05, 5);
+		  
+		  
+		  /*  address jump */
+		  @(negedge clk) ;
+		  pc_load = 1; 	
+		  pc_jump_addr = 8'h0D;
+		  
+			check(8'h0D,6);
+			/*  force reset */
+			
+			 @(negedge clk);
+			 pc_load = 1;
+		    pc_jump_addr = 8'h0D;
+			 rst =1;
+		  
+			 check(8'h00,99);
+				
+		  /* jump  address  then  incremnet  to wrap  around */
+		  
+		  @(negedge clk);
+			rst =0;
+		   pc_load = 1;
+		   pc_jump_addr = 8'hFD;
+			check(8'hFD,7);
+		 
+		  @(negedge clk); 
+			pc_load = 0;
+
+        check(8'hFE, 8);
+        check(8'hFF, 9);
+        check(8'h00, 10);  //  wrap around
+        check(8'h01, 11);
+		  
+		  
+		  
+		  $display("tests passed");
+		  
+		  
+		  
+		   
+		  
+		  
         #100 $finish;
     end
 endmodule
