@@ -1,7 +1,7 @@
 // ============================================================
 //  control_unit.v  -  Control Unit  (combinational decoder)
 //  8-Bit Accumulator Processor - CND Internship
-//  Owner: __________
+//  Owner: Basel
 // ============================================================
 module control_unit (
     input  wire [3:0] opcode,
@@ -9,6 +9,7 @@ module control_unit (
     input  wire       c_flag,
     output reg        acc_load,
     output reg        mem_write,
+    output reg        memR,
     output reg        mux_sel,
     output reg        pc_load,
     output reg [2:0] ALU_sel
